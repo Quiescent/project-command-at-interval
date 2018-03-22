@@ -13,7 +13,7 @@
 
 (require 'project)
 
-(defvar project-command-at-interval-timer-alist '()
+(defvar project-command-at-interval-timers (make-hash-table :test #'equal)
   "An alist of project roots to their commands.
 
   Only one command can be run per project.")
@@ -31,24 +31,28 @@
                                   project-root
                                   command
                                   interval)))
-    (push (cons project-root (run-at-time t (string-to-number interval)
-                                          (lambda ()
-                                            (start-file-process-shell-command process-name
-                                                                              (get-buffer-create process-name)
-                                                                              command-at-root))))
-          project-command-at-interval-timer-alist)))
+    (if (gethash project-root project-command-at-interval-timers)
+        (user-error "A command is already runnig for this project")
+      (puthash project-root (run-at-time t (string-to-number interval)
+                                         (lambda ()
+                                           (start-file-process-shell-command process-name
+                                                                             (get-buffer-create process-name)
+                                                                             command-at-root)))
+               project-command-at-interval-timers))))
 
 (defun project-command-at-interval-stop-current ()
   "Cancel the command for the current project.
 
   Posts the command to the MESSAGES buffer."
   (interactive)
-  (let ((project-root (car (project-roots (project-current)))))
-    (pcase (assoc project-root project-command-at-interval-timer-alist)
-      (`(,_ . ,timer)
-       (cancel-timer timer)
-       (message "Terminated: %s" timer))
-      (_ (user-error (format "No project command for %s" project-root))))))
+  (let* ((project-root          (car (project-roots (project-current))))
+         (project-command-timer (gethash project-root project-command-at-interval-timers)))
+    (if project-command-timer
+        (progn
+          (cancel-timer project-command-timer)
+          (remhash project-root project-command-at-interval-timers)
+          (message "Terminated: %s" project-command-timer))
+      (user-error (format "No command running in %s" project-root)))))
 
 (provide 'project-command-at-interval)
 ;;; project-command-at-interval ends here
