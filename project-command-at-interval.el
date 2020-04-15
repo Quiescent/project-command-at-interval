@@ -21,9 +21,9 @@
 (defun project-command-at-interval-run (interval command)
   "Run COMMAND at the root of the current project.
 
-  Command is repeated every INTERVAL seconds from now.
+Command is repeated every INTERVAL seconds from now.
 
-  Assume that there is one project root."
+Assume that there is one project root."
   (interactive "sinterval: \nscommand: ")
   (let* ((project-root    (car (project-roots (project-current))))
          (command-at-root (concat (expand-file-name project-root) command))
@@ -43,7 +43,7 @@
 (defun project-command-at-interval-stop-current ()
   "Cancel the command for the current project.
 
-  Posts the command to the MESSAGES buffer."
+Posts the command to the MESSAGES buffer."
   (interactive)
   (let* ((project-root          (car (project-roots (project-current))))
          (project-command-timer (gethash project-root project-command-at-interval-timers)))
