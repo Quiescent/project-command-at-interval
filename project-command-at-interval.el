@@ -54,5 +54,18 @@ Posts the command to the MESSAGES buffer."
           (message "Terminated: %s" project-command-timer))
       (user-error (format "No command running in %s" project-root)))))
 
+(defvar project-command-at-interval-default-tags-command "ctags -eR"
+  "The default tag regeneration command.")
+
+(defun project-command-at-interval-generate-ctags (tags-command)
+  "Generate tags for the current project at an interval of every five seconds.
+
+Supply a different TAGS-COMMAND should yours differ from the default."
+  (interactive (format "sTags command (default: %s): "
+                       project-command-at-interval-default-tags-command))
+  (project-command-at-interval-run "5"
+                                   (or tags-command
+                                       project-command-at-interval-default-tags-command)))
+
 (provide 'project-command-at-interval)
 ;;; project-command-at-interval ends here
