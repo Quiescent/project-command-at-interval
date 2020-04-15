@@ -33,7 +33,7 @@ Assume that there is one project root."
                                   interval)))
     (if (gethash project-root project-command-at-interval-timers)
         (user-error "A command is already runnig for this project")
-      (puthash project-root (run-at-time t (string-to-number interval)
+      (puthash project-root (run-at-time t interval
                                          (lambda ()
                                            (start-file-process-shell-command process-name
                                                                              (get-buffer-create process-name)
